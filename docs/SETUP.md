@@ -13,7 +13,7 @@ npx wrangler login
 ```
 ---
 
-## Step-by-step: from CLI to Production UI (what we did today)
+## Step-by-step: from CLI to Production UI
 
 ### 1) Create the project (create-cloudflare CLI)
 
