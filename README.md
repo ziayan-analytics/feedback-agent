@@ -52,9 +52,7 @@ feedback-agent/
 ## How It Works
 - User types feedback in the UI and clicks Submit
 
-- Frontend sends the feedback to the Worker:
-
-POST /api/feedback
+- Frontend sends the feedback to the Worker: POST /api/feedback
 
 - The Worker calls Cloudflare Workers AI to generate:
 
@@ -64,9 +62,7 @@ POST /api/feedback
 
 - The Worker stores feedback + AI labels in Cloudflare D1
 
-- UI fetches and displays the latest feedback list from:
-
-GET /api/feedback
+- UI fetches and displays the latest feedback list from: GET /api/feedback
 
 ---
 
