@@ -48,47 +48,52 @@ feedback-agent/
 ├── package.json
 └── README.md
 ```
-How It Works
-User types feedback in the UI and clicks Submit
+---
+## How It Works
+- User types feedback in the UI and clicks Submit
 
-Frontend sends the feedback to the Worker:
+- Frontend sends the feedback to the Worker:
 
 POST /api/feedback
 
-The Worker calls Cloudflare Workers AI to generate:
+- The Worker calls Cloudflare Workers AI to generate:
 
-summary
+  - `summary`
+  - `sentiment` (positive / neutral / negative)
+  - `category` (Bug / Feature Request / Praise / Other)
 
-sentiment
+- The Worker stores feedback + AI labels in Cloudflare D1
 
-category
-
-The Worker stores feedback + AI labels in Cloudflare D1
-
-UI fetches and displays the latest feedback list from:
+- UI fetches and displays the latest feedback list from:
 
 GET /api/feedback
 
-API Usage
-Submit feedback
-bash
-Copy code
+---
+
+## API Usage
+
+### Submit feedback
+
+```bash
 curl -X POST https://feedback-agent.zia-feedback-agent.workers.dev/api/feedback \
   -H "Content-Type: application/json" \
   -d '{"text":"the price is too high"}'
+```
 Response:
 
-json
-Copy code
+```json
+
 { "ok": true }
-Fetch latest feedback
-bash
-Copy code
+```
+### Fetch latest feedback
+```bash
+
 curl https://feedback-agent.zia-feedback-agent.workers.dev/api/feedback
+```
 Example response:
 
-json
-Copy code
+```json
+
 {
   "ok": true,
   "data": [
@@ -102,29 +107,41 @@ Copy code
     }
   ]
 }
-Local Development
-Install dependencies
-bash
-Copy code
-npm install
-Run locally
-bash
-Copy code
-npm run dev
-Open:
+```
+---
+## Local Development
+### Install dependencies
+``` bash
 
-arduino
-Copy code
+npm install
+```
+
+### Run locally
+``` bash
+
+
+npm run dev
+``` 
+### Open:
+
+``` arduino
+
 http://localhost:8787
-Deploy
-bash
-Copy code
+```
+---
+## Deploy
+```bash
+
 npm run deploy
-Notes
+```
+---
+## Notes
 If you update bindings in wrangler.jsonc, regenerate types:
 
-bash
-Copy code
+``` bash
+
 npx wrangler types
-Author
+```
+---
+## Author
 Zia Yan (UCSD)
