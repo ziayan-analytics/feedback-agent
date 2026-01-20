@@ -1,32 +1,121 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Hello, World!</title>
-	</head>
-	<body>
-		<h1 id="heading"></h1>
-		<p>This page comes from a static asset stored at `public/index.html` as configured in `wrangler.jsonc`.</p>
-		<button id="button" type="button">Fetch a random UUID</button>
-		<output id="random" for="button"></output>
-		<script>
-			fetch('/message')
-				.then((resp) => resp.text())
-				.then((text) => {
-					const h1 = document.getElementById('heading');
-					h1.textContent = text;
-				});
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feedback Agent</title>
+    <style>
+      body { font-family: system-ui, -apple-system, sans-serif; margin: 48px; background: #fff; }
+      h1 { font-size: 40px; margin: 0 0 8px; }
+      .sub { color: #666; margin-bottom: 24px; }
+      .card { border: 1px solid #e6e6e6; border-radius: 14px; padding: 18px; max-width: 900px; }
+      textarea { width: 100%; height: 110px; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 14px; }
+      button { border: 0; padding: 10px 16px; border-radius: 10px; background: #f2f2f2; cursor: pointer; font-weight: 600; margin-right: 10px; }
+      button:hover { background: #e9e9e9; }
+      .row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+      .status { font-size: 14px; color: #444; }
+      .ok { color: #1a7f37; font-weight: 700; }
+      .bad { color: #c62828; font-weight: 700; }
+      ul { margin-top: 14px; padding-left: 20px; }
+      li { margin: 10px 0; }
+      .meta { color: #666; font-size: 13px; }
+      code { background: #f6f6f6; padding: 2px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <h1>Feedback Agent</h1>
+    <div class="sub">Submit feedback → AI labels it → store in Cloudflare D1.</div>
 
-			const button = document.getElementById("button");
-			button.addEventListener("click", () => {
-				fetch('/random')
-					.then((resp) => resp.text())
-					.then((text) => {
-						const random = document.getElementById('random');
-						random.textContent = text;
-					});
-			});
-		</script>
-	</body>
+    <div class="card">
+      <div style="font-weight: 700; margin-bottom: 6px;">Your feedback</div>
+      <textarea id="text" placeholder="Type something..."></textarea>
+
+      <div class="row">
+        <div>
+          <button id="submit">Submit</button>
+          <button id="refresh">Refresh</button>
+        </div>
+        <div class="status" id="status">Loading...</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 18px;">
+      <div style="font-weight: 800; font-size: 18px;">Latest feedback</div>
+      <ul id="list"></ul>
+    </div>
+
+    <script>
+      const $status = document.getElementById("status");
+      const $text = document.getElementById("text");
+      const $list = document.getElementById("list");
+
+      function setStatus(ok, msg) {
+        $status.innerHTML = ok
+          ? `Loaded <span class="ok">✓</span>`
+          : `Load failed <span class="bad">✗</span>`;
+        if (msg) console.log(msg);
+      }
+
+      async function load() {
+        try {
+          const res = await fetch("/api/feedback");
+          const json = await res.json();
+          if (!json.ok) throw new Error(json.error || "fetch failed");
+
+          $list.innerHTML = "";
+          (json.data || []).forEach((x) => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+              <div><b>#${x.id}</b> ${escapeHtml(x.text)}</div>
+              <div class="meta">
+                <div>🧠 summary: <code>${escapeHtml(x.summary || "")}</code></div>
+                <div>😊 sentiment: <code>${escapeHtml(x.sentiment || "")}</code> | 🏷 category: <code>${escapeHtml(x.category || "")}</code></div>
+                <div>🕒 ${escapeHtml(x.created_at || "")}</div>
+              </div>
+            `;
+            $list.appendChild(li);
+          });
+
+          setStatus(true);
+        } catch (e) {
+          setStatus(false, e);
+        }
+      }
+
+      async function submit() {
+        const text = $text.value.trim();
+        if (!text) return;
+
+        try {
+          $status.textContent = "Submitting...";
+          const res = await fetch("/api/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          });
+          const json = await res.json();
+          if (!json.ok) throw new Error(json.error || "submit failed");
+          $text.value = "";
+          await load();
+        } catch (e) {
+          setStatus(false, e);
+        }
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      document.getElementById("submit").addEventListener("click", submit);
+      document.getElementById("refresh").addEventListener("click", load);
+
+      load();
+    </script>
+  </body>
 </html>
+

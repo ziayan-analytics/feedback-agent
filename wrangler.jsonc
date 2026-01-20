@@ -16,7 +16,18 @@
 	},
 	"observability": {
 		"enabled": true
-	}
+	},
+	"d1_databases": [
+		{
+			"binding": "feedback_db",
+			"database_name": "feedback_db",
+			"database_id": "87487672-bdff-4557-8f7f-501f1bb01f8d"
+		}
+	],
+
+	"ai": {
+    "binding": "AI"
+    }
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
