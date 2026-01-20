@@ -1,6 +1,6 @@
 # Feedback Agent (Cloudflare Workers + D1 + Workers AI)
 
-A lightweight feedback collection app built on **Cloudflare Workers**.  
+A lightweight feedback collection app built on **Cloudflare Workers**.
 Users submit feedback in the browser, the Worker calls **Cloudflare Workers AI** to generate structured labels (summary / sentiment / category), and stores everything in **Cloudflare D1**.
 
 ---
@@ -8,6 +8,16 @@ Users submit feedback in the browser, the Worker calls **Cloudflare Workers AI**
 ## Live Demo
 
 - **Production URL:** https://feedback-agent.zia-feedback-agent.workers.dev
+- **How to use it:** This app provides a simple workflow for teams to collect and triage user feedback in a structured way.
+
+1. A team member copies a piece of feedback (e.g., from Slack, customer support tickets, emails, or app reviews) and pastes it into the browser UI.
+2. Click **Submit** to send the feedback to the Cloudflare Worker.
+3. The Worker calls **Cloudflare Workers AI** to automatically generate structured labels:
+   - `summary`
+   - `sentiment` (positive / neutral / negative)
+   - `category` (Bug / Feature Request / Praise / Other)
+4. The feedback and AI-generated labels are saved directly into **Cloudflare D1**.
+5. The latest feedback can be viewed in the UI (via **Refresh**) or retrieved programmatically through the API (`GET /api/feedback`) for further analysis, exporting, or downstream pipelines.
 
 ---
 
@@ -46,25 +56,13 @@ feedback-agent/
 ├── wrangler.jsonc            # Wrangler configuration (D1 + AI bindings)
 ├── worker-configuration.d.ts # Generated types
 ├── package.json
-└── README.md
+└── docs
+    └── README.md
+    └── SETUP.md
 ```
----
-## How It Works
-- User types feedback in the UI and clicks Submit
-
-- Frontend sends the feedback to the Worker: POST /api/feedback
-
-- The Worker calls Cloudflare Workers AI to generate:
-
-  - `summary`
-  - `sentiment` (positive / neutral / negative)
-  - `category` (Bug / Feature Request / Praise / Other)
-
-- The Worker stores feedback + AI labels in Cloudflare D1
-
-- UI fetches and displays the latest feedback list from: GET /api/feedback
 
 ---
+
 
 ## API Usage
 
@@ -75,18 +73,22 @@ curl -X POST https://feedback-agent.zia-feedback-agent.workers.dev/api/feedback 
   -H "Content-Type: application/json" \
   -d '{"text":"the price is too high"}'
 ```
-Response:
+
+* Response:
 
 ```json
 
 { "ok": true }
 ```
+
 ### Fetch latest feedback
+
 ```bash
 
 curl https://feedback-agent.zia-feedback-agent.workers.dev/api/feedback
 ```
-Example response:
+
+* Example response:
 
 ```json
 
@@ -104,40 +106,55 @@ Example response:
   ]
 }
 ```
+
 ---
+
 ## Local Development
+
 ### Install dependencies
-``` bash
+
+```bash
 
 npm install
 ```
 
 ### Run locally
-``` bash
+
+```bash
 
 
 npm run dev
-``` 
+```
+
 ### Open:
 
-``` arduino
+```arduino
 
 http://localhost:8787
 ```
+
 ---
+
 ## Deploy
+
 ```bash
 
 npm run deploy
 ```
+
 ---
+
 ## Notes
+
 If you update bindings in wrangler.jsonc, regenerate types:
 
-``` bash
+```bash
 
 npx wrangler types
 ```
+
 ---
+
 ## Author
+
 Zia Yan (UCSD)
