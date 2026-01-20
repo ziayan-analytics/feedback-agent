@@ -75,7 +75,7 @@ Example:
 
 ```
 
-Note: The Workers AI binding often appears automatically in generated types as AI: Ai;.
+### Note: The Workers AI binding often appears automatically in generated types as AI: Ai;.
 If you added/changed bindings, regenerate types (next step).
 ---
 
